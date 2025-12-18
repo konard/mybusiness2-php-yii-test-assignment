@@ -1,60 +1,142 @@
-<p align="center">
-    <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
-    </a>
-    <h1 align="center">Yii 2 Advanced Project Template</h1>
-    <br>
-</p>
+# MyBusiness2 PHP Yii Test Assignment
 
-Yii 2 Advanced Project Template is a skeleton [Yii 2](https://www.yiiframework.com/) application best for
-developing complex Web applications with multiple tiers.
+A test assignment for https://mybusiness2.ru implementing an Apple management system using Yii2 Advanced Template.
 
-The template includes three tiers: front end, back end, and console, each of which
-is a separate Yii application.
+## Requirements
 
-The template is designed to work in a team development environment. It supports
-deploying the application in different environments.
+- PHP 8.0+
+- MySQL 5.7+
+- Composer
 
-Documentation is at [docs/guide/README.md](docs/guide/README.md).
+## Installation
 
-[![Latest Stable Version](https://img.shields.io/packagist/v/yiisoft/yii2-app-advanced.svg)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![Total Downloads](https://img.shields.io/packagist/dt/yiisoft/yii2-app-advanced.svg)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![build](https://github.com/yiisoft/yii2-app-advanced/workflows/build/badge.svg)](https://github.com/yiisoft/yii2-app-advanced/actions?query=workflow%3Abuild)
+1. Clone the repository:
+```bash
+git clone https://github.com/konard/mybusiness2-php-yii-test-assignment.git
+cd mybusiness2-php-yii-test-assignment
+```
 
-DIRECTORY STRUCTURE
--------------------
+2. Install dependencies:
+```bash
+composer install
+```
+
+3. Initialize the application:
+```bash
+php init --env=Development
+```
+
+4. Configure database in `common/config/main-local.php`:
+```php
+'db' => [
+    'class' => \yii\db\Connection::class,
+    'dsn' => 'mysql:host=localhost;dbname=yii2advanced',
+    'username' => 'your_username',
+    'password' => 'your_password',
+    'charset' => 'utf8',
+],
+```
+
+5. Run migrations:
+```bash
+php yii migrate
+```
+
+6. Create an admin user:
+```bash
+php yii user/create admin admin@example.com your_password
+```
+
+7. Start the backend application:
+```bash
+php -S localhost:8080 -t backend/web
+```
+
+8. Access the backend at http://localhost:8080 and login with your admin credentials.
+
+## Features
+
+### Apple Model
+
+The Apple model (`common/models/Apple.php`) implements the following functionality:
+
+**Properties:**
+- `color` - Apple color (green, red, yellow, golden, pink)
+- `created_at` - Unix timestamp when apple appeared on tree
+- `fallen_at` - Unix timestamp when apple fell from tree
+- `status` - Current state (on tree, fallen, rotten)
+- `eaten_percent` - Percentage of apple eaten (0-100)
+- `size` - Remaining size as decimal (1 = whole, 0 = eaten)
+
+**States:**
+- On Tree - Apple is hanging on the tree
+- Fallen - Apple has fallen to the ground
+- Rotten - Apple is spoiled (after 5 hours on ground)
+
+**Functions:**
+- `fallToGround()` - Make the apple fall from the tree
+- `eat($percent)` - Eat a portion of the apple
+- `createRandom()` - Create a new apple with random color
+- `generateRandom($count)` - Generate multiple random apples
+
+**Business Rules:**
+- Apple on tree cannot be eaten
+- Apple on tree cannot rot
+- Apple becomes rotten after 5 hours on ground
+- Rotten apple cannot be eaten
+- Fully eaten apple is deleted
+
+### Backend Application
+
+The password-protected backend provides:
+- Apple list with status indicators
+- Generate random apples form
+- Fall, eat, delete actions
+- Detailed apple view
+
+### Usage Example
+
+```php
+$apple = new Apple('green');
+
+echo $apple->color; // green
+
+$apple->eat(50); // Throws exception - cannot eat apple on tree
+echo $apple->size; // 1 - decimal
+
+$apple->fallToGround(); // Fall to ground
+$apple->eat(25); // Eat 25%
+echo $apple->size; // 0.75
+```
+
+## Testing
+
+Run unit tests:
+```bash
+vendor/bin/codecept run common/tests/unit/models/AppleTest.php
+```
+
+Run the test script:
+```bash
+php experiments/test_apple.php
+```
+
+## Directory Structure
 
 ```
 common
-    config/              contains shared configurations
-    mail/                contains view files for e-mails
-    models/              contains model classes used in both backend and frontend
-    tests/               contains tests for common classes    
+    models/              Apple, User, LoginForm models
+    tests/               Unit tests for Apple model
 console
-    config/              contains console configurations
-    controllers/         contains console controllers (commands)
-    migrations/          contains database migrations
-    models/              contains console-specific model classes
-    runtime/             contains files generated during runtime
+    controllers/         UserController for CLI user management
+    migrations/          Database migrations
 backend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains backend configurations
-    controllers/         contains Web controller classes
-    models/              contains backend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for backend application    
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
+    controllers/         AppleController, SiteController
+    views/               Apple management views
 frontend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains frontend configurations
-    controllers/         contains Web controller classes
-    models/              contains frontend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for frontend application
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-    widgets/             contains frontend widgets
-vendor/                  contains dependent 3rd-party packages
-environments/            contains environment-based overrides
+    ...                  Standard Yii2 frontend application
 ```
+
+## License
+
+MIT License
